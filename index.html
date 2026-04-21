@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SOYL AI — Hotel PMS Onboarding</title>
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    /* ════════════════════════════ BRAND TOKENS ════════════════════════════ */
+    :root {
+      --black:      #030709;
+      --black-2:    #0c1117;
+      --black-3:    #141b22;
+      --black-4:    #1c252e;
+      --white:      #F8FCFD;
+      --teal:       #AFD0CC;
+      --teal-dim:   #7faaa6;
+      --teal-glow:  rgba(175,208,204,.18);
+      --gray:       #636467;
+      --gray-light: #9da0a3;
+      --border:     rgba(175,208,204,.22);
+      --font-head:  'Exo 2', 'Century Gothic', 'Trebuchet MS', sans-serif;
+      --font-body:  'Inter', 'Gadugi', 'Segoe UI', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--black);
+      color: var(--white);
+      min-height: 100vh;
+    }
+
+    /* ════════════ SETUP BANNER ════════════ */
+    .setup-banner {
+      background: linear-gradient(90deg, #0d2420 0%, #0a1e1c 100%);
+      border-bottom: 1px solid var(--teal);
+      padding: 14px 28px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+    .setup-banner .icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+    .setup-banner .content { flex: 1; }
+    .setup-banner strong { color: var(--teal); font-family: var(--font-head); font-size: 13px; }
+    .setup-banner p { font-size: 12px; color: var(--gray-light); margin-top: 3px; line-height: 1.6; }
+    .setup-banner a { color: var(--teal); text-decoration: underline; }
+    .url-input-row { display: flex; gap: 10px; margin-top: 10px; align-items: center; flex-wrap: wrap; }
+    .url-input-row input {
+      flex: 1;
+      min-width: 260px;
+      background: rgba(255,255,255,.05);
+      border: 1.5px solid var(--border);
+      border-radius: 7px;
+      padding: 8px 13px;
+      font-size: 12px;
+      color: var(--white);
+      font-family: var(--font-body);
+    }
+    .url-input-row input:focus { outline: none; border-color: var(--teal); }
+    .url-input-row input::placeholder { color: var(--gray); }
+    .btn-save-url {
+      background: var(--teal);
+      color: var(--black);
+      border: none;
+      border-radius: 7px;
+      padding: 8px 16px;
+      font-size: 12px;
+      font-weight: 700;
+      font-family: var(--font-head);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: opacity .2s;
+    }
+    .btn-save-url:hover { opacity: .85; }
+    .url-status { font-size: 11px; color: var(--teal); font-weight: 600; display: none; }
+
+    /* ════════════ HEADER ════════════ */
+    header {
+      background: var(--black);
+      border-bottom: 1px solid var(--border);
+      padding: 24px 36px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-inner {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .logo-mark {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      border: 1.5px solid var(--teal);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      background: radial-gradient(circle at 40% 40%, #1e3030 0%, var(--black) 70%);
+      box-shadow: 0 0 18px rgba(175,208,204,.15);
+      overflow: hidden;
+    }
+    .logo-mark svg { width: 34px; height: 34px; }
+    .header-text {}
+    .header-text .company {
+      font-family: var(--font-head);
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--white);
+      line-height: 1;
+    }
+    .header-text .pvt { font-weight: 400; font-size: 13px; letter-spacing: .1em; opacity: .7; }
+    .header-text .tagline {
+      font-family: var(--font-head);
+      font-size: 12px;
+      color: var(--teal);
+      letter-spacing: .12em;
+      margin-top: 3px;
+      font-weight: 300;
+    }
+    .header-right { margin-left: auto; text-align: right; }
+    .header-right .form-title {
+      font-family: var(--font-head);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--teal);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .header-right .form-sub { font-size: 11px; color: var(--gray-light); margin-top: 2px; }
+
+    /* Progress */
+    .progress-wrap { height: 3px; background: var(--black-3); }
+    .progress-fill { height: 3px; background: var(--teal); transition: width .4s ease; width: 25%; }
+
+    /* ════════════ TAB NAV ════════════ */
+    .tab-nav {
+      background: var(--black-2);
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+    }
+    .tab-nav::-webkit-scrollbar { display: none; }
+    .tab-btn {
+      flex: 1;
+      min-width: 130px;
+      padding: 15px 12px;
+      border: none;
+      background: none;
+      font-family: var(--font-head);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--gray);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: color .2s, border-color .2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+    }
+    .tab-btn .tab-icon { font-size: 15px; }
+    .tab-btn:hover { color: var(--teal-dim); }
+    .tab-btn.active { color: var(--teal); border-bottom-color: var(--teal); }
+    .tab-btn .done-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--teal);
+      display: none;
+    }
+    .tab-btn.done .done-dot { display: inline-block; }
+
+    /* ════════════ CONTAINER ════════════ */
+    .container { max-width: 840px; margin: 32px auto 100px; padding: 0 20px; }
+
+    /* ════════════ CARDS ════════════ */
+    .card {
+      background: var(--black-2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 30px 32px;
+      margin-bottom: 20px;
+    }
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+    .card-icon {
+      width: 38px; height: 38px;
+      border-radius: 9px;
+      background: var(--teal-glow);
+      border: 1px solid var(--teal);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .card-title-wrap {}
+    .card-title {
+      font-family: var(--font-head);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--white);
+      letter-spacing: .04em;
+    }
+    .card-desc { font-size: 12.5px; color: var(--gray-light); margin-top: 3px; line-height: 1.5; }
+
+    /* ════════════ FORM FIELDS ════════════ */
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .grid.single { grid-template-columns: 1fr; }
+    .grid.triple { grid-template-columns: 1fr 1fr 1fr; }
+
+    .field { display: flex; flex-direction: column; gap: 7px; }
+    .field.span2 { grid-column: span 2; }
+    .field.span3 { grid-column: span 3; }
+
+    label {
+      font-family: var(--font-head);
+      font-size: 11.5px;
+      font-weight: 600;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      color: var(--gray-light);
+    }
+    label .req { color: var(--teal); margin-left: 2px; }
+    label .hint { font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--gray); font-size: 11px; margin-left: 5px; font-family: var(--font-body); }
+
+    input[type="text"], input[type="email"], input[type="tel"],
+    input[type="number"], input[type="time"], input[type="url"],
+    select, textarea {
+      background: var(--black-3);
+      border: 1.5px solid rgba(175,208,204,.18);
+      border-radius: 8px;
+      padding: 11px 14px;
+      font-size: 13.5px;
+      color: var(--white);
+      font-family: var(--font-body);
+      width: 100%;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--teal);
+      box-shadow: 0 0 0 3px rgba(175,208,204,.1);
+    }
+    input::placeholder, textarea::placeholder { color: var(--gray); font-size: 13px; }
+    textarea { resize: vertical; min-height: 80px; }
+    select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23AFD0CC' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 13px center;
+      padding-right: 36px;
+      cursor: pointer;
+    }
+    select option { background: var(--black-3); }
+
+    /* ════════════ CHECKBOX GRID ════════════ */
+    .check-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 9px; margin-top: 4px; }
+    .check-item {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      background: var(--black-3);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 9px 12px;
+      cursor: pointer;
+      transition: border-color .15s, background .15s;
+      user-select: none;
+    }
+    .check-item:has(input:checked) { border-color: var(--teal); background: var(--teal-glow); }
+    .check-item input[type="checkbox"] { width: 15px; height: 15px; accent-color: var(--teal); cursor: pointer; flex-shrink: 0; }
+    .check-item span { font-size: 12.5px; font-weight: 500; color: var(--gray-light); }
+    .check-item:has(input:checked) span { color: var(--white); }
+
+    /* ════════════ DIVIDER ════════════ */
+    .divider { border: none; border-top: 1px solid var(--border); margin: 22px 0; }
+
+    /* ════════════ REPEAT BLOCKS ════════════ */
+    .block {
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      padding: 20px 22px;
+      margin-bottom: 14px;
+      background: var(--black-3);
+      position: relative;
+    }
+    .block-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .block-label {
+      font-family: var(--font-head);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--teal);
+      letter-spacing: .05em;
+    }
+    .btn-remove {
+      background: none;
+      border: 1px solid rgba(239,68,68,.35);
+      color: rgba(239,68,68,.8);
+      border-radius: 6px;
+      padding: 4px 12px;
+      font-size: 11.5px;
+      font-weight: 600;
+      font-family: var(--font-head);
+      cursor: pointer;
+      letter-spacing: .04em;
+      transition: all .15s;
+    }
+    .btn-remove:hover { background: rgba(239,68,68,.1); border-color: rgba(239,68,68,.6); color: #ef4444; }
+
+    .btn-add {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: none;
+      border: 1.5px dashed rgba(175,208,204,.3);
+      color: var(--gray-light);
+      border-radius: 10px;
+      padding: 13px;
+      font-size: 12.5px;
+      font-weight: 600;
+      font-family: var(--font-head);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: border-color .2s, color .2s;
+      margin-top: 4px;
+    }
+    .btn-add:hover { border-color: var(--teal); color: var(--teal); }
+
+    /* ════════════ TAB PAGES ════════════ */
+    .tab-page { display: none; }
+    .tab-page.active { display: block; }
+
+    /* ════════════ NAV BUTTONS ════════════ */
+    .nav-btns { display: flex; justify-content: space-between; gap: 12px; margin-top: 24px; }
+    .btn-nav {
+      padding: 12px 28px;
+      border-radius: 9px;
+      font-family: var(--font-head);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border: none;
+      transition: all .2s;
+    }
+    .btn-prev { background: var(--black-3); color: var(--gray-light); border: 1px solid var(--border); }
+    .btn-prev:hover { color: var(--white); border-color: var(--gray); }
+    .btn-next { background: var(--teal); color: var(--black); margin-left: auto; }
+    .btn-next:hover { background: #c5deda; }
+
+    /* ════════════ SUBMIT ════════════ */
+    .btn-submit {
+      width: 100%;
+      background: linear-gradient(135deg, var(--teal) 0%, #8bbfba 100%);
+      color: var(--black);
+      border: none;
+      border-radius: 11px;
+      padding: 17px;
+      font-family: var(--font-head);
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      margin-top: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: opacity .2s, transform .1s;
+    }
+    .btn-submit:hover { opacity: .9; }
+    .btn-submit:active { transform: scale(.99); }
+    .btn-submit.loading { opacity: .7; pointer-events: none; }
+
+    /* ════════════ MODAL ════════════ */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(3,7,9,.85);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      backdrop-filter: blur(4px);
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--black-2);
+      border: 1px solid var(--teal);
+      border-radius: 16px;
+      box-shadow: 0 0 60px rgba(175,208,204,.12);
+      max-width: 680px;
+      width: 100%;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .modal-head {
+      padding: 24px 28px;
+      background: var(--black-3);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .modal-head h3 { font-family: var(--font-head); font-size: 18px; font-weight: 800; color: var(--teal); letter-spacing: .04em; }
+    .modal-head p  { font-size: 12px; color: var(--gray-light); margin-top: 3px; }
+    .modal-close {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--gray-light);
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: color .2s, border-color .2s;
+    }
+    .modal-close:hover { color: var(--white); border-color: var(--white); }
+    .modal-body { padding: 22px 28px; overflow-y: auto; flex: 1; }
+
+    /* Success state */
+    .success-box {
+      text-align: center;
+      padding: 30px 20px;
+    }
+    .success-icon { font-size: 56px; margin-bottom: 16px; }
+    .success-box h2 { font-family: var(--font-head); font-size: 22px; font-weight: 800; color: var(--teal); margin-bottom: 8px; }
+    .success-box p { font-size: 13.5px; color: var(--gray-light); line-height: 1.6; }
+    .success-box .sheet-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      margin-top: 20px;
+      background: var(--teal-glow);
+      border: 1px solid var(--teal);
+      border-radius: 9px;
+      padding: 11px 22px;
+      color: var(--teal);
+      font-family: var(--font-head);
+      font-weight: 700;
+      font-size: 13px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .success-box .sheet-link:hover { background: rgba(175,208,204,.25); }
+
+    /* Error state */
+    .error-box { background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.3); border-radius: 10px; padding: 18px; margin-bottom: 16px; color: #fca5a5; font-size: 13px; }
+
+    /* Offline JSON */
+    .json-box {
+      background: var(--black);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      margin-top: 14px;
+    }
+    .json-box pre {
+      color: var(--teal);
+      font-size: 11.5px;
+      font-family: 'Courier New', monospace;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height: 1.6;
+      max-height: 260px;
+      overflow-y: auto;
+    }
+    .modal-actions {
+      padding: 16px 28px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .btn-copy {
+      background: var(--teal);
+      color: var(--black);
+      border: none;
+      border-radius: 8px;
+      padding: 9px 20px;
+      font-family: var(--font-head);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .05em;
+      cursor: pointer;
+      transition: opacity .2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-copy:hover { opacity: .85; }
+    .btn-copy.copied { background: #22c55e; }
+    .btn-dl {
+      background: var(--black-3);
+      color: var(--gray-light);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 9px 20px;
+      font-family: var(--font-head);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .05em;
+      cursor: pointer;
+      transition: all .15s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-dl:hover { color: var(--white); border-color: var(--gray); }
+
+    /* ════════════ RESPONSIVE ════════════ */
+    @media (max-width: 600px) {
+      .grid { grid-template-columns: 1fr; }
+      .grid.triple { grid-template-columns: 1fr 1fr; }
+      .field.span2, .field.span3 { grid-column: span 1; }
+      .card { padding: 20px 18px; }
+      header { padding: 16px 18px; }
+      .header-right { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════ SETUP BANNER ═══════════════════ -->
+<div class="setup-banner">
+  <div class="icon">🔗</div>
+  <div class="content">
+    <strong>Connect to Google Sheets</strong>
+    <p>
+      To save responses automatically, deploy the included <code>soylai_apps_script.gs</code> file as a Google Apps Script Web App,
+      then paste the deployment URL below.
+      <a href="#setup-instructions" onclick="document.getElementById('setupModal').classList.add('open'); return false;">View setup guide →</a>
+    </p>
+    <div class="url-input-row">
+      <input type="url" id="scriptUrl" placeholder="Paste your Apps Script Web App URL here — e.g. https://script.google.com/macros/s/…/exec"/>
+      <button class="btn-save-url" onclick="saveScriptUrl()">Save URL</button>
+      <span class="url-status" id="urlStatus">✓ URL saved</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ HEADER ═══════════════════ -->
+<header>
+  <div class="header-inner">
+    <div class="logo-mark">
+      <!-- Stylised SOYL AI lens/aperture mark -->
+      <svg viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="17" cy="17" r="15.5" stroke="#AFD0CC" stroke-width="1"/>
+        <ellipse cx="17" cy="17" rx="9" ry="12" fill="rgba(175,208,204,.08)" stroke="rgba(175,208,204,.4)" stroke-width=".8" transform="rotate(-30 17 17)"/>
+        <ellipse cx="17" cy="17" rx="9" ry="12" fill="rgba(175,208,204,.06)" stroke="rgba(175,208,204,.3)" stroke-width=".8" transform="rotate(30 17 17)"/>
+        <ellipse cx="17" cy="17" rx="9" ry="12" fill="rgba(175,208,204,.05)" stroke="rgba(175,208,204,.2)" stroke-width=".8"/>
+        <circle cx="17" cy="17" r="4" fill="#AFD0CC" opacity=".7"/>
+      </svg>
+    </div>
+    <div class="header-text">
+      <div class="company">SOYL AI <span class="pvt">PRIVATE LIMITED</span></div>
+      <div class="tagline">Story Of Your Life</div>
+    </div>
+    <div class="header-right">
+      <div class="form-title">PMS Onboarding Questionnaire</div>
+      <div class="form-sub">Confidential · Hotel Setup Data</div>
+    </div>
+  </div>
+</header>
+<div class="progress-wrap">
+  <div class="progress-fill" id="progressBar"></div>
+</div>
+
+<!-- ═══════════════════ TAB NAV ═══════════════════ -->
+<div class="tab-nav">
+  <button class="tab-btn active" onclick="goTo(0)" id="tab0">
+    <span class="tab-icon">🏢</span> Hotel Info <span class="done-dot"></span>
+  </button>
+  <button class="tab-btn" onclick="goTo(1)" id="tab1">
+    <span class="tab-icon">🛏️</span> Rooms <span class="done-dot"></span>
+  </button>
+  <button class="tab-btn" onclick="goTo(2)" id="tab2">
+    <span class="tab-icon">💰</span> Rates <span class="done-dot"></span>
+  </button>
+  <button class="tab-btn" onclick="goTo(3)" id="tab3">
+    <span class="tab-icon">👥</span> Staff <span class="done-dot"></span>
+  </button>
+</div>
+
+<div class="container">
+
+  <!-- ══════════════════ PAGE 0 — Hotel Info ══════════════════ -->
+  <div class="tab-page active" id="page0">
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">🏢</div>
+        <div class="card-title-wrap">
+          <div class="card-title">General Hotel Information</div>
+          <div class="card-desc">Basic details to populate the hotel profile in the PMS.</div>
+        </div>
+      </div>
+      <div class="grid">
+        <div class="field span2">
+          <label>Hotel Name <span class="req">*</span></label>
+          <input type="text" id="hotelName" placeholder="e.g. Grand Vista Hotel"/>
+        </div>
+        <div class="field span2">
+          <label>Street Address <span class="req">*</span></label>
+          <input type="text" id="hotelAddress" placeholder="e.g. 123 Ocean Drive"/>
+        </div>
+        <div class="field">
+          <label>City <span class="req">*</span></label>
+          <input type="text" id="hotelCity" placeholder="e.g. Dubai"/>
+        </div>
+        <div class="field">
+          <label>Country <span class="req">*</span></label>
+          <input type="text" id="hotelCountry" placeholder="e.g. UAE"/>
+        </div>
+        <div class="field">
+          <label>Phone <span class="req">*</span></label>
+          <input type="tel" id="hotelPhone" placeholder="e.g. +971 4 000 0000"/>
+        </div>
+        <div class="field">
+          <label>Email <span class="req">*</span></label>
+          <input type="email" id="hotelEmail" placeholder="e.g. info@hotel.com"/>
+        </div>
+        <div class="field">
+          <label>Website <span class="hint">(optional)</span></label>
+          <input type="url" id="hotelWebsite" placeholder="https://"/>
+        </div>
+        <div class="field">
+          <label>Star Rating <span class="req">*</span></label>
+          <select id="hotelStars">
+            <option value="">— Select —</option>
+            <option>1 Star</option><option>2 Stars</option><option>3 Stars</option>
+            <option>4 Stars</option><option>5 Stars</option><option>Unrated / Boutique</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Number of Floors <span class="req">*</span></label>
+          <input type="number" id="hotelFloors" placeholder="e.g. 8" min="1"/>
+        </div>
+        <div class="field">
+          <label>Total Rooms <span class="req">*</span></label>
+          <input type="number" id="hotelTotalRooms" placeholder="e.g. 120" min="1"/>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">⏰</div>
+        <div class="card-title-wrap">
+          <div class="card-title">Policies</div>
+          <div class="card-desc">Standard operating policies for the PMS.</div>
+        </div>
+      </div>
+      <div class="grid">
+        <div class="field">
+          <label>Check-in Time <span class="req">*</span></label>
+          <input type="time" id="checkIn" value="14:00"/>
+        </div>
+        <div class="field">
+          <label>Check-out Time <span class="req">*</span></label>
+          <input type="time" id="checkOut" value="12:00"/>
+        </div>
+        <div class="field">
+          <label>Currency <span class="req">*</span></label>
+          <select id="currency">
+            <option value="">— Select —</option>
+            <option>USD – US Dollar</option><option>EUR – Euro</option>
+            <option>GBP – British Pound</option><option>AED – UAE Dirham</option>
+            <option>INR – Indian Rupee</option><option>PKR – Pakistani Rupee</option>
+            <option>SAR – Saudi Riyal</option><option>MYR – Malaysian Ringgit</option>
+            <option>PHP – Philippine Peso</option><option>Other</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Tax Rate (%) <span class="hint">on room rate</span></label>
+          <input type="number" id="taxRate" placeholder="e.g. 10" min="0" max="100"/>
+        </div>
+        <div class="field span2">
+          <label>Cancellation Policy</label>
+          <textarea id="cancelPolicy" placeholder="e.g. Free cancellation up to 48h before check-in. After that, 1 night charge applies."></textarea>
+        </div>
+        <div class="field span2">
+          <label>Child Policy <span class="hint">(optional)</span></label>
+          <textarea id="childPolicy" placeholder="e.g. Children under 12 stay free sharing parents' room."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">✨</div>
+        <div class="card-title-wrap">
+          <div class="card-title">Hotel Facilities</div>
+          <div class="card-desc">Select all facilities available at the property.</div>
+        </div>
+      </div>
+      <div class="check-grid" id="facilitiesGroup">
+        <label class="check-item"><input type="checkbox" value="Swimming Pool"/><span>🏊 Swimming Pool</span></label>
+        <label class="check-item"><input type="checkbox" value="Gym / Fitness"/><span>💪 Gym / Fitness</span></label>
+        <label class="check-item"><input type="checkbox" value="Restaurant"/><span>🍽️ Restaurant</span></label>
+        <label class="check-item"><input type="checkbox" value="Bar / Lounge"/><span>🍸 Bar / Lounge</span></label>
+        <label class="check-item"><input type="checkbox" value="Spa & Wellness"/><span>🧖 Spa & Wellness</span></label>
+        <label class="check-item"><input type="checkbox" value="Conference Rooms"/><span>📊 Conference Rooms</span></label>
+        <label class="check-item"><input type="checkbox" value="Parking"/><span>🅿️ Parking</span></label>
+        <label class="check-item"><input type="checkbox" value="Airport Shuttle"/><span>🚌 Airport Shuttle</span></label>
+        <label class="check-item"><input type="checkbox" value="Room Service"/><span>🛎️ Room Service</span></label>
+        <label class="check-item"><input type="checkbox" value="Free WiFi"/><span>📶 Free WiFi</span></label>
+        <label class="check-item"><input type="checkbox" value="Business Center"/><span>💼 Business Center</span></label>
+        <label class="check-item"><input type="checkbox" value="Laundry Service"/><span>👔 Laundry</span></label>
+        <label class="check-item"><input type="checkbox" value="Gift Shop"/><span>🛍️ Gift Shop</span></label>
+        <label class="check-item"><input type="checkbox" value="Kids Club"/><span>🧒 Kids Club</span></label>
+        <label class="check-item"><input type="checkbox" value="Pet Friendly"/><span>🐾 Pet Friendly</span></label>
+        <label class="check-item"><input type="checkbox" value="EV Charging"/><span>⚡ EV Charging</span></label>
+      </div>
+    </div>
+
+    <div class="nav-btns">
+      <button class="btn-nav btn-next" onclick="goTo(1)">Next: Rooms →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════ PAGE 1 — Rooms ══════════════════ -->
+  <div class="tab-page" id="page1">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">🛏️</div>
+        <div class="card-title-wrap">
+          <div class="card-title">Room Types</div>
+          <div class="card-desc">Add each distinct room category. Click the button below to add more types.</div>
+        </div>
+      </div>
+      <div id="roomList"></div>
+      <button class="btn-add" onclick="addRoom()">＋ Add Room Type</button>
+    </div>
+    <div class="nav-btns">
+      <button class="btn-nav btn-prev" onclick="goTo(0)">← Back</button>
+      <button class="btn-nav btn-next" onclick="goTo(2)">Next: Rates →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════ PAGE 2 — Rates ══════════════════ -->
+  <div class="tab-page" id="page2">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">💰</div>
+        <div class="card-title-wrap">
+          <div class="card-title">Room Rates</div>
+          <div class="card-desc">Per-night rates before tax, per room type defined in the Rooms tab.</div>
+        </div>
+      </div>
+      <div id="ratesBox">
+        <p style="color:var(--gray); font-size:13px; text-align:center; padding:22px 0;">← Fill in room types first, then come back here.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">🏷️</div>
+        <div class="card-title-wrap">
+          <div class="card-title">Rate Plans & Packages</div>
+          <div class="card-desc">Any special packages, seasonal deals, or discount codes to activate.</div>
+        </div>
+      </div>
+      <div id="planList"></div>
+      <button class="btn-add" onclick="addPlan()">＋ Add Rate Plan</button>
+    </div>
+
+    <div class="nav-btns">
+      <button class="btn-nav btn-prev" onclick="goTo(1)">← Back</button>
+      <button class="btn-nav btn-next" onclick="goTo(3)">Next: Staff →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════ PAGE 3 — Staff ══════════════════ -->
+  <div class="tab-page" id="page3">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">👥</div>
+        <div class="card-title-wrap">
+          <div class="card-title">Staff & System Users</div>
+          <div class="card-desc">All team members who will access the PMS. One entry per person.</div>
+        </div>
+      </div>
+      <div id="staffList"></div>
+      <button class="btn-add" onclick="addStaff()">＋ Add Staff Member</button>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">📝</div>
+        <div class="card-title-wrap">
+          <div class="card-title">Additional Notes</div>
+          <div class="card-desc">Anything else the SOYL AI team should know for configuration.</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Notes <span class="hint">(optional)</span></label>
+        <textarea id="extraNotes" style="min-height:100px" placeholder="e.g. 3 rooms under renovation until May. Peak season is June–August. Third-party restaurant POS in use…"></textarea>
+      </div>
+    </div>
+
+    <div class="nav-btns">
+      <button class="btn-nav btn-prev" onclick="goTo(2)">← Back</button>
+    </div>
+
+    <button class="btn-submit" id="submitBtn" onclick="submitForm()">
+      <span id="submitText">✅ Submit to SOYL AI</span>
+    </button>
+  </div>
+
+</div><!-- /container -->
+
+<!-- ═══════════════════ RESULT MODAL ═══════════════════ -->
+<div class="modal-overlay" id="resultModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <h3 id="modalTitle">Submission Complete</h3>
+        <p id="modalSub">Your data has been saved to Google Sheets.</p>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-actions" id="modalActions">
+      <button class="btn-copy" id="copyBtn" onclick="copyJson()">📋 Copy JSON</button>
+      <button class="btn-dl" onclick="downloadJson()">⬇️ Download .json</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ SETUP GUIDE MODAL ═══════════════════ -->
+<div class="modal-overlay" id="setupModal">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-head">
+      <div>
+        <h3>Google Sheets Setup Guide</h3>
+        <p>3 simple steps to connect this form to your sheet</p>
+      </div>
+      <button class="modal-close" onclick="document.getElementById('setupModal').classList.remove('open')">✕</button>
+    </div>
+    <div class="modal-body" style="font-size:13.5px; line-height:1.8; color:var(--gray-light);">
+      <p><strong style="color:var(--teal); font-family:var(--font-head);">Step 1</strong> — Go to <a href="https://script.google.com" target="_blank" style="color:var(--teal)">script.google.com</a> and create a new project.</p>
+      <br/>
+      <p><strong style="color:var(--teal); font-family:var(--font-head);">Step 2</strong> — Delete any existing code and paste the entire contents of <code style="color:var(--teal)">soylai_apps_script.gs</code> into the editor. Click Save.</p>
+      <br/>
+      <p><strong style="color:var(--teal); font-family:var(--font-head);">Step 3</strong> — Click <strong>Deploy → New Deployment</strong>. Set type to <em>Web App</em>. Set <em>"Execute as"</em> to <strong>Me</strong>. Set <em>"Who has access"</em> to <strong>Anyone</strong>. Click Deploy, authorize it, and copy the Web App URL.</p>
+      <br/>
+      <p>Paste that URL into the field at the top of this page and click <strong>Save URL</strong>. You're done! Submissions will now appear in a Google Sheet named <strong>SOYL AI — PMS Onboarding</strong> in your Google Drive.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─────────────── Config ───────────────
+let SCRIPT_URL = localStorage.getItem('soylai_script_url') || '';
+if (SCRIPT_URL) document.getElementById('scriptUrl').value = SCRIPT_URL;
+
+function saveScriptUrl() {
+  SCRIPT_URL = document.getElementById('scriptUrl').value.trim();
+  localStorage.setItem('soylai_script_url', SCRIPT_URL);
+  const s = document.getElementById('urlStatus');
+  s.style.display = 'inline';
+  setTimeout(() => s.style.display = 'none', 3000);
+}
+
+// ─────────────── Tab nav ───────────────
+let currentTab = 0;
+const tabCount = 4;
+
+function goTo(n) {
+  document.querySelectorAll('.tab-page').forEach((p, i) => p.classList.toggle('active', i === n));
+  document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', i === n));
+  currentTab = n;
+  document.getElementById('progressBar').style.width = ((n + 1) / tabCount * 100) + '%';
+  if (n === 2) syncRates();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ─────────────── Rooms ───────────────
+let roomCount = 0;
+function addRoom() {
+  roomCount++;
+  const id = roomCount;
+  const div = document.createElement('div');
+  div.className = 'block'; div.id = 'room-' + id;
+  div.innerHTML = `
+    <div class="block-header">
+      <span class="block-label">Room Type #${id}</span>
+      <button class="btn-remove" onclick="removeBlock('room-${id}', refreshRoomLabels)">Remove</button>
+    </div>
+    <div class="grid">
+      <div class="field span2">
+        <label>Room Type Name <span class="req">*</span></label>
+        <input type="text" class="rn" placeholder="e.g. Deluxe Double, Junior Suite…" oninput="refreshRoomLabels()"/>
+      </div>
+      <div class="field"><label>Number of Rooms <span class="req">*</span></label><input type="number" class="rc" placeholder="e.g. 20" min="1"/></div>
+      <div class="field"><label>Bed Type <span class="req">*</span></label>
+        <select class="rb">
+          <option value="">— Select —</option>
+          <option>Single</option><option>Double</option><option>Queen</option>
+          <option>King</option><option>Twin</option><option>Bunk</option><option>Sofa Bed</option>
+        </select>
+      </div>
+      <div class="field"><label>Base Occupancy</label><input type="number" class="rbo" placeholder="e.g. 2" min="1"/></div>
+      <div class="field"><label>Max Occupancy</label><input type="number" class="rmo" placeholder="e.g. 3" min="1"/></div>
+      <div class="field"><label>Size (sqm)</label><input type="number" class="rsz" placeholder="e.g. 28" min="1"/></div>
+      <div class="field"><label>Floor(s) <span class="hint">e.g. 2–4</span></label><input type="text" class="rfl" placeholder="e.g. 1, 2, 3"/></div>
+      <div class="field"><label>Smoking Policy</label>
+        <select class="rsm">
+          <option value="">— Select —</option>
+          <option>Non-Smoking</option><option>Smoking</option><option>Both Available</option>
+        </select>
+      </div>
+      <div class="field"><label>View Type</label>
+        <select class="rv">
+          <option value="">— Select —</option>
+          <option>City View</option><option>Ocean View</option><option>Garden View</option>
+          <option>Pool View</option><option>Mountain View</option><option>No Specific View</option>
+        </select>
+      </div>
+    </div>
+    <hr class="divider"/>
+    <label style="margin-bottom:8px;display:block;">In-Room Amenities</label>
+    <div class="check-grid">
+      <label class="check-item"><input type="checkbox" class="ra" value="Air Conditioning"/><span>❄️ Air Con</span></label>
+      <label class="check-item"><input type="checkbox" class="ra" value="Smart TV"/><span>📺 Smart TV</span></label>
+      <label class="check-item"><input type="checkbox" class="ra" value="Mini Bar"/><span>🍾 Mini Bar</span></label>
+      <label class="check-item"><input type="checkbox" class="ra" value="Safe"/><span>🔒 Safe</span></label>
+      <label class="check-item"><input type="checkbox" class="ra" value="Balcony"/><span>🌅 Balcony</span></label>
+      <label class="check-item"><input type="checkbox" class="ra" value="Bathtub"/><span>🛁 Bathtub</span></label>
+      <label class="check-item"><input type="checkbox" class="ra" value="Jacuzzi"/><span>♨️ Jacuzzi</span></label>
+      <label class="check-item"><input type="checkbox" class="ra" value="Coffee Maker"/><span>☕ Coffee Maker</span></label>
+      <label class="check-item"><input type="checkbox" class="ra" value="Hair Dryer"/><span>💇 Hair Dryer</span></label>
+      <label class="check-item"><input type="checkbox" class="ra" value="WiFi"/><span>📶 WiFi</span></label>
+      <label class="check-item"><input type="checkbox" class="ra" value="Work Desk"/><span>💻 Work Desk</span></label>
+      <label class="check-item"><input type="checkbox" class="ra" value="Kitchen"/><span>🍳 Kitchen</span></label>
+    </div>`;
+  document.getElementById('roomList').appendChild(div);
+}
+
+function refreshRoomLabels() {
+  document.querySelectorAll('#roomList .block').forEach((b, i) => {
+    const name = b.querySelector('.rn')?.value || '';
+    b.querySelector('.block-label').textContent = `Room Type #${i + 1}${name ? ' — ' + name : ''}`;
+  });
+}
+
+// ─────────────── Rates (synced) ───────────────
+function syncRates() {
+  const rooms = document.querySelectorAll('#roomList .block');
+  const box = document.getElementById('ratesBox');
+  if (!rooms.length) { box.innerHTML = '<p style="color:var(--gray);font-size:13px;text-align:center;padding:22px 0;">← Fill in room types first.</p>'; return; }
+  const prev = {};
+  box.querySelectorAll('.rate-row').forEach(r => { prev[r.dataset.rid] = { wd: r.querySelector('.rwd')?.value||'', we: r.querySelector('.rwe')?.value||'', ep: r.querySelector('.rep')?.value||'' }; });
+  box.innerHTML = '';
+  rooms.forEach(b => {
+    const rid = b.id, name = b.querySelector('.rn')?.value || '(Unnamed)', p = prev[rid] || {};
+    const div = document.createElement('div');
+    div.className = 'block rate-row'; div.dataset.rid = rid;
+    div.innerHTML = `
+      <div class="block-header" style="margin-bottom:14px">
+        <span class="block-label">🛏️ ${name}</span>
+      </div>
+      <div class="grid triple">
+        <div class="field"><label>Weekday / Night <span class="req">*</span></label><input type="number" class="rwd" placeholder="e.g. 150" min="0" value="${p.wd}"/></div>
+        <div class="field"><label>Weekend / Night <span class="req">*</span></label><input type="number" class="rwe" placeholder="e.g. 180" min="0" value="${p.we}"/></div>
+        <div class="field"><label>Extra Person / Night</label><input type="number" class="rep" placeholder="e.g. 25" min="0" value="${p.ep}"/></div>
+      </div>`;
+    box.appendChild(div);
+  });
+}
+
+// ─────────────── Rate Plans ───────────────
+let planCount = 0;
+function addPlan() {
+  planCount++;
+  const id = planCount, div = document.createElement('div');
+  div.className = 'block'; div.id = 'plan-' + id;
+  div.innerHTML = `
+    <div class="block-header">
+      <span class="block-label">Rate Plan #${id}</span>
+      <button class="btn-remove" onclick="removeBlock('plan-${id}')">Remove</button>
+    </div>
+    <div class="grid">
+      <div class="field"><label>Plan Name <span class="req">*</span></label><input type="text" placeholder="e.g. Honeymoon Package"/></div>
+      <div class="field"><label>Discount / Adjustment</label><input type="text" placeholder="e.g. 15% off, +$30 breakfast"/></div>
+      <div class="field"><label>Valid From</label><input type="text" placeholder="e.g. 01 Jun 2025"/></div>
+      <div class="field"><label>Valid To</label><input type="text" placeholder="e.g. 31 Aug 2025"/></div>
+      <div class="field span2"><label>Conditions / Notes</label><input type="text" placeholder="e.g. Must book 14 days in advance, non-refundable"/></div>
+    </div>`;
+  document.getElementById('planList').appendChild(div);
+}
+
+// ─────────────── Staff ───────────────
+let staffCount = 0;
+function addStaff() {
+  staffCount++;
+  const id = staffCount, div = document.createElement('div');
+  div.className = 'block'; div.id = 'staff-' + id;
+  div.innerHTML = `
+    <div class="block-header">
+      <span class="block-label">Staff Member #${id}</span>
+      <button class="btn-remove" onclick="removeBlock('staff-${id}')">Remove</button>
+    </div>
+    <div class="grid">
+      <div class="field"><label>Full Name <span class="req">*</span></label><input type="text" placeholder="e.g. Maria Santos"/></div>
+      <div class="field"><label>Job Title <span class="req">*</span></label><input type="text" placeholder="e.g. Front Desk Agent"/></div>
+      <div class="field"><label>Department <span class="req">*</span></label>
+        <select>
+          <option value="">— Select —</option>
+          <option>Management</option><option>Front Desk / Reception</option>
+          <option>Housekeeping</option><option>Food & Beverage</option>
+          <option>Maintenance</option><option>Security</option>
+          <option>Sales & Marketing</option><option>Finance</option><option>IT</option><option>Other</option>
+        </select>
+      </div>
+      <div class="field"><label>PMS Access Level <span class="req">*</span></label>
+        <select>
+          <option value="">— Select —</option>
+          <option>Admin (Full Access)</option><option>Manager</option>
+          <option>Front Desk (Reservations + Check-in/out)</option>
+          <option>Housekeeping (Room Status Only)</option><option>Read-Only</option>
+        </select>
+      </div>
+      <div class="field"><label>Work Email <span class="req">*</span></label><input type="email" placeholder="e.g. maria@hotel.com"/></div>
+      <div class="field"><label>Phone / Extension</label><input type="tel" placeholder="e.g. Ext. 201"/></div>
+    </div>`;
+  document.getElementById('staffList').appendChild(div);
+}
+
+// ─────────────── Remove ───────────────
+function removeBlock(id, cb) {
+  const el = document.getElementById(id);
+  if (el) el.remove();
+  if (cb) cb();
+}
+
+// ─────────────── Collect data ───────────────
+function collectData() {
+  const facilities = [...document.querySelectorAll('#facilitiesGroup input:checked')].map(c => c.value);
+  const hotelInfo = {
+    name: v('hotelName'), address: v('hotelAddress'), city: v('hotelCity'), country: v('hotelCountry'),
+    phone: v('hotelPhone'), email: v('hotelEmail'), website: v('hotelWebsite'),
+    starRating: v('hotelStars'), floors: vn('hotelFloors'), totalRooms: vn('hotelTotalRooms'),
+    checkIn: v('checkIn'), checkOut: v('checkOut'), currency: v('currency'),
+    taxRatePercent: vn('taxRate'), cancellationPolicy: v('cancelPolicy'),
+    childPolicy: v('childPolicy'), facilities,
+  };
+  const roomTypes = [...document.querySelectorAll('#roomList .block')].map(b => ({
+    name:          b.querySelector('.rn')?.value || '',
+    totalRooms:    parseInt(b.querySelector('.rc')?.value) || null,
+    bedType:       b.querySelector('.rb')?.value || '',
+    baseOccupancy: parseInt(b.querySelector('.rbo')?.value) || null,
+    maxOccupancy:  parseInt(b.querySelector('.rmo')?.value) || null,
+    sizeSqm:       parseInt(b.querySelector('.rsz')?.value) || null,
+    floors:        b.querySelector('.rfl')?.value || '',
+    smokingPolicy: b.querySelector('.rsm')?.value || '',
+    viewType:      b.querySelector('.rv')?.value || '',
+    amenities:     [...b.querySelectorAll('.ra:checked')].map(c => c.value),
+  }));
+  const rates = [...document.querySelectorAll('#ratesBox .rate-row')].map(r => {
+    const b = document.getElementById(r.dataset.rid);
+    return {
+      roomType:          b ? (b.querySelector('.rn')?.value || r.dataset.rid) : r.dataset.rid,
+      weekdayRate:       parseFloat(r.querySelector('.rwd')?.value) || null,
+      weekendRate:       parseFloat(r.querySelector('.rwe')?.value) || null,
+      extraPersonCharge: parseFloat(r.querySelector('.rep')?.value) || null,
+    };
+  });
+  const ratePlans = [...document.querySelectorAll('#planList .block')].map(b => {
+    const ins = b.querySelectorAll('input');
+    return { name: ins[0]?.value||'', discount: ins[1]?.value||'', validFrom: ins[2]?.value||'', validTo: ins[3]?.value||'', conditions: ins[4]?.value||'' };
+  });
+  const staff = [...document.querySelectorAll('#staffList .block')].map(b => {
+    const ins = b.querySelectorAll('input,select');
+    return { fullName: ins[0]?.value||'', jobTitle: ins[1]?.value||'', department: ins[2]?.value||'', accessLevel: ins[3]?.value||'', email: ins[4]?.value||'', phone: ins[5]?.value||'' };
+  });
+  return {
+    _meta: { submittedAt: new Date().toISOString(), formVersion: '1.0', source: 'SOYL AI PMS Onboarding Form' },
+    hotelInfo, roomTypes, rates, ratePlans, staff, notes: v('extraNotes'),
+  };
+}
+
+// ─────────────── Submit ───────────────
+let lastJson = '';
+async function submitForm() {
+  const data = collectData();
+  lastJson = JSON.stringify(data, null, 2);
+
+  const btn = document.getElementById('submitBtn');
+  const txt = document.getElementById('submitText');
+  btn.classList.add('loading');
+  txt.textContent = '⏳ Submitting…';
+
+  if (!SCRIPT_URL) {
+    btn.classList.remove('loading'); txt.textContent = '✅ Submit to SOYL AI';
+    showOfflineResult(data);
+    return;
+  }
+
+  try {
+    const res = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify(data),
+      headers: { 'Content-Type': 'text/plain' },
+    });
+    const json = await res.json();
+    btn.classList.remove('loading'); txt.textContent = '✅ Submit to SOYL AI';
+    if (json.success) showSuccessResult(json);
+    else showErrorResult(json.error || 'Unknown error from Apps Script.', data);
+  } catch (err) {
+    btn.classList.remove('loading'); txt.textContent = '✅ Submit to SOYL AI';
+    showErrorResult('Could not reach Google Sheets: ' + err.message + '. Is the Apps Script URL correct?', data);
+  }
+}
+
+function showSuccessResult(json) {
+  document.getElementById('modalTitle').textContent = '🎉 Submitted Successfully';
+  document.getElementById('modalSub').textContent = 'Saved to your Google Sheet.';
+  document.getElementById('modalBody').innerHTML = `
+    <div class="success-box">
+      <div class="success-icon">✅</div>
+      <h2>Data saved to Google Sheets</h2>
+      <p>The hotel onboarding data has been written to the <strong>SOYL AI — PMS Onboarding</strong> spreadsheet in your Google Drive.</p>
+      ${json.sheetUrl ? `<a class="sheet-link" href="${json.sheetUrl}" target="_blank">📊 Open Google Sheet →</a>` : ''}
+    </div>`;
+  document.getElementById('modalActions').style.display = 'none';
+  document.getElementById('resultModal').classList.add('open');
+}
+
+function showOfflineResult(data) {
+  document.getElementById('modalTitle').textContent = 'No Script URL Set';
+  document.getElementById('modalSub').textContent = 'Copy the JSON below to use as seed data.';
+  document.getElementById('modalBody').innerHTML = `
+    <div class="error-box">⚠️ No Apps Script URL is configured. Add one at the top of the page to save directly to Google Sheets. For now, copy the JSON below.</div>
+    <div class="json-box"><pre>${escHtml(lastJson)}</pre></div>`;
+  document.getElementById('modalActions').style.display = 'flex';
+  document.getElementById('resultModal').classList.add('open');
+}
+
+function showErrorResult(msg, data) {
+  document.getElementById('modalTitle').textContent = 'Submission Error';
+  document.getElementById('modalSub').textContent = 'Something went wrong. Copy the JSON as a fallback.';
+  document.getElementById('modalBody').innerHTML = `
+    <div class="error-box">⚠️ ${escHtml(msg)}</div>
+    <p style="font-size:12.5px;color:var(--gray-light);margin-bottom:8px;">Your data is safe — copy or download the JSON below:</p>
+    <div class="json-box"><pre>${escHtml(lastJson)}</pre></div>`;
+  document.getElementById('modalActions').style.display = 'flex';
+  document.getElementById('resultModal').classList.add('open');
+}
+
+function closeModal() { document.getElementById('resultModal').classList.remove('open'); }
+document.getElementById('resultModal').addEventListener('click', e => { if (e.target === document.getElementById('resultModal')) closeModal(); });
+
+function copyJson() {
+  navigator.clipboard.writeText(lastJson).then(() => {
+    const b = document.getElementById('copyBtn');
+    b.textContent = '✓ Copied!'; b.classList.add('copied');
+    setTimeout(() => { b.innerHTML = '📋 Copy JSON'; b.classList.remove('copied'); }, 2000);
+  });
+}
+function downloadJson() {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([lastJson], { type: 'application/json' }));
+  a.download = 'soylai_pms_seed_' + Date.now() + '.json'; a.click();
+}
+
+// ─────────────── Helpers ───────────────
+function v(id)  { return (document.getElementById(id)?.value || '').trim(); }
+function vn(id) { return parseFloat(document.getElementById(id)?.value) || null; }
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ─────────────── Init ───────────────
+addRoom();
+addStaff();
+</script>
+</body>
+</html>
