@@ -406,24 +406,6 @@
     .success-icon { font-size: 56px; margin-bottom: 16px; }
     .success-box h2 { font-family: var(--font-head); font-size: 22px; font-weight: 800; color: var(--teal); margin-bottom: 8px; }
     .success-box p { font-size: 13.5px; color: var(--gray-light); line-height: 1.6; }
-    .success-box .sheet-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      margin-top: 20px;
-      background: var(--teal-glow);
-      border: 1px solid var(--teal);
-      border-radius: 9px;
-      padding: 11px 22px;
-      color: var(--teal);
-      font-family: var(--font-head);
-      font-weight: 700;
-      font-size: 13px;
-      text-decoration: none;
-      cursor: pointer;
-      transition: background .2s;
-    }
-    .success-box .sheet-link:hover { background: rgba(175,208,204,.25); }
 
     /* Error state */
     .error-box { background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.3); border-radius: 10px; padding: 18px; margin-bottom: 16px; color: #fca5a5; font-size: 13px; }
@@ -1044,13 +1026,12 @@ async function submitForm() {
 
 function showSuccessResult(json) {
   document.getElementById('modalTitle').textContent = '🎉 Submitted Successfully';
-  document.getElementById('modalSub').textContent = 'Saved to your Google Sheet.';
+  document.getElementById('modalSub').textContent = 'Your data has been saved.';
   document.getElementById('modalBody').innerHTML = `
     <div class="success-box">
       <div class="success-icon">✅</div>
       <h2>Data saved to Google Sheets</h2>
-      <p>The hotel onboarding data has been written to the <strong>SOYL AI — PMS Onboarding</strong> spreadsheet in your Google Drive.</p>
-      ${json.sheetUrl ? `<a class="sheet-link" href="${json.sheetUrl}" target="_blank">📊 Open Google Sheet →</a>` : ''}
+      <p>The hotel onboarding data has been written to the <strong>SOYL AI — PMS Onboarding</strong> spreadsheet. The SOYL AI team will be in touch to complete your PMS setup.</p>
     </div>`;
   document.getElementById('modalActions').style.display = 'none';
   document.getElementById('resultModal').classList.add('open');
